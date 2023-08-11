@@ -1,0 +1,232 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+<title>彭浩然-记单词系统</title>  
+<style>  
+body {  
+background-image: url("https://img-qn.51miz.com/preview/video/00/00/14/30/V-143013-453F5351.jpg");  
+background-size: cover;  
+color: #333;  
+font-family: 'Helvetica Neue', Arial, sans-serif;  
+text-align: center;  
+}  
+  
+.container {  
+max-width: 900px;  
+margin: 0 auto;  
+padding: 20px;  
+}  
+  
+.title {  
+font-family: '华文行楷', serif;  
+text-align: center;  
+font-size: 24px;  
+margin-bottom: 20px;  
+}  
+  
+#loginForm {  
+display: block;  
+margin: 20px auto;  
+}  
+  
+#loginForm h2 {  
+color: #666;  
+}  
+  
+#loginForm input {  
+width: 200px;  
+padding: 10px;  
+}  
+  
+#loginForm button {  
+padding: 10px 20px;  
+margin-top: 10px;  
+}  
+  
+#mainContent {  
+display: none;  
+}  
+  
+#mainContent h2 {  
+margin-bottom: 20px;  
+}  
+  
+#mainContent input {  
+width: 100%;  
+padding: 10px;  
+margin-bottom: 20px;  
+}  
+  
+#quizWord {  
+font-size: 24px;  
+text-align: center;  
+}  
+  
+#quizAnswer {  
+width: 100%;  
+}  
+  
+#errorList {  
+list-style-type: none;  
+padding: 0;  
+}  
+  
+footer {  
+background-color: #f7f7f7;  
+padding: 20px;  
+text-align: center;  
+}  
+</style>     
+</head>  
+<body>  
+<div class="container">  
+<h1 class="title">彭浩然的-在线记单词系统</h1>    
+<div id="loginForm">  
+<h2 class="title">管理员登录</h2>  
+<input type="text" id="username" placeholder="用户名">  
+<input type="password" id="password" placeholder="密码">  
+<button onclick="login()">登录</button>  
+</div>  
+<h2 class="title">当前时间： <span id="currentTime"></span></h2>  
+<div id="mainContent">  
+<h2 class="title">添加单词和意思</h2>     
+<input type="text" id="word" placeholder="输入单词">  
+<input type="text" id="meaning" placeholder="输入意思">  
+<button onclick="addWord()">添加单词</button>  
+<h2 class="title">记单词模式</h2>   
+<button onclick="startQuiz()">开始记单词</button> <p id="quizWord"></p> <input type="text" id="quizAnswer" placeholder="输入单词意思"> <button onclick="checkAnswer()">提交答案</button> 																																			 		
+  <h2 class="title">单词错误本</h2>  <ol id="errorList"></ol> </div></div> <footer> <p>版权所有 ©2023-2028 彭浩然的-在线记单词系统</p> </footer> </body> </html>
+
+  <script>
+    var wordBank = [];
+    var errorWords = [];
+    var quizIndex = 0;
+    
+    function login() {
+      var usernameInput = document.getElementById("username");
+      var passwordInput = document.getElementById("password");
+      var username = usernameInput.value.trim();
+      var password = passwordInput.value.trim();
+      
+      if (username === "管理员" && password === "123456") {
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+      } else {
+        alert("用户名或密码错误");
+      }
+      
+      // 清空输入框
+      usernameInput.value = "";
+      passwordInput.value = "";
+    }
+
+function updateTime() {
+  var currentTimeElement = document.getElementById("currentTime");
+  var currentTime = new Date();
+  currentTimeElement.innerText = currentTime.toLocaleTimeString();
+}
+
+// 每秒更新一次时间
+setInterval(updateTime, 1000);
+    
+    
+    function changeBackground() {
+      var bgColorInput = document.getElementById("bgColor");
+      var bgColor = bgColorInput.value;
+      
+      document.body.style.backgroundColor = bgColor;
+    }
+    
+    function addWord() {
+      var wordInput = document.getElementById("word");
+      var meaningInput = document.getElementById("meaning");
+      
+      var word = wordInput.value.trim();
+      var meaning = meaningInput.value.trim();
+      
+      if (word === "" || meaning === "") {
+        alert("请填写单词和意思");
+        return;
+      }
+      
+      // 添加到单词本
+      wordBank.push({ word: word, meaning: meaning });
+      
+      // 重置输入框
+      wordInput.value = "";
+      meaningInput.value = "";
+      
+      alert("单词已添加到单词本");
+    }
+    
+    function startQuiz() {
+      if (wordBank.length === 0) {
+        alert("请先添加单词到单词本");
+        return;
+      }
+      
+      quizIndex = 0;
+      
+      // 随机抽取一个单词
+      var randomIndex = Math.floor(Math.random() * wordBank.length);
+      var quizWord = wordBank[randomIndex];
+      
+      // 显示单词
+      var quizWordElem = document.getElementById("quizWord");
+      quizWordElem.innerText = quizWord.word;
+    }
+    
+    function checkAnswer() {
+ var answerInput = document.getElementById("quizAnswer");
+      var answer = answerInput.value.trim();
+      
+      if (answer === "") {
+        alert("请输入答案");
+        return;
+      }
+      
+      var quizWord = wordBank[quizIndex];
+      
+      if (answer.toLowerCase() === quizWord.meaning.toLowerCase()) {
+        alert("答案正确");
+      } else {
+        // 加入到错误本
+        errorWords.push(quizWord);
+        
+        // 按序号排序
+        errorWords.sort(function(a, b) {
+          return a.word.localeCompare(b.word);
+        });
+        
+        // 更新错误本列表
+        var errorListElem = document.getElementById("errorList");
+        errorListElem.innerHTML = "";
+        
+        for (var i = 0; i < errorWords.length; i++) {
+          var word = errorWords[i];
+          var listItem = document.createElement("li");
+          listItem.innerText = word.word + " -> " + word.meaning;
+          errorListElem.appendChild(listItem);
+        }
+        
+        alert("答案错误，已加入到单词错误本");
+      }
+      
+      // 清空输入框
+      answerInput.value = "";
+      
+      // 继续下一个单词
+      quizIndex++;
+      
+      if (quizIndex >= wordBank.length) {
+        alert("已完成所有单词");
+        quizIndex = 0;
+      } else {
+        var nextQuizWord = wordBank[quizIndex];
+        var quizWordElem = document.getElementById("quizWord");
+        quizWordElem.innerText = nextQuizWord.word;
+      }
+    }
+  </script>
+</body>
+</html>
